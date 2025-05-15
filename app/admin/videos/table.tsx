@@ -120,8 +120,8 @@ const VideoTable: React.FC = () => {
             key: "video",
             label: "Video",
             renderCell: (category: Category) => {
-                const videoSrc = `https://infinitech-testing5.online/videos/${category.video}`;
-                const posterSrc = `https://infinitech-testing5.online/videos/${category.thumbnail}`;
+                const videoSrc = `https://infinitech-testing5.online/${category.video}`;
+                const posterSrc = `https://infinitech-testing5.online/${category.thumbnail}`;
 
                 return (
                     <video
