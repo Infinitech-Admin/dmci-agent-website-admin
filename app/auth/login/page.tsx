@@ -8,7 +8,7 @@ const Login = () => {
             <div className="flex flex-col bg-white border shadow-sm rounded-xl p-4 w-full max-w-md h-full max-h-md md:p-5">
                 <div className="flex flex-col justify-center items-center">
                     <img
-                        src="https://infinitech-testing5.online/logo/dmci-logo-only.png"
+                        src="https://infinitech-api6.site/logo/dmci-logo-only.png"
                         className="h-24"
                         alt="Logo"
                     />
