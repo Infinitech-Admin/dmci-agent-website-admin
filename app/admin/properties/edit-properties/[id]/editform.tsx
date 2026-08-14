@@ -40,7 +40,7 @@ const EditForm = ({ property, properties }: Props) => {
       ? JSON.parse(property.images)
       : property.images || []
   ).map((image: string) => {
-    return `https://infinitech-testing5.online/properties/images/${image}`;
+    return `https://infinitech-api6.site/properties/images/${image}`;
   });
 
   const [imagePreviews, setImagePreviews] = useState<string[]>(initialImages);
@@ -121,14 +121,14 @@ const EditForm = ({ property, properties }: Props) => {
         const imageArray = JSON.parse(property.image); // Assuming it's stored as a stringified array
         const imageUrls = imageArray.map(
           (filename: string) =>
-            `https://infinitech-testing5.online/properties/images/${filename}`
+            `https://infinitech-api6.site/properties/images/${filename}`,
         );
         setImagePreviews(imageUrls);
       } catch (error) {
         console.error("Error parsing property.image JSON:", error);
       }
     } else {
-      const imageUrl = `https://infinitech-testing5.online/properties/images/${property.property_plan_image}`;
+      const imageUrl = `https://infinitech-api6.site/properties/images/${property.property_plan_image}`;
       setPlanPreviews(imageUrl);
     }
   }, [property.image, property.property_plan_image]);
@@ -192,7 +192,7 @@ const EditForm = ({ property, properties }: Props) => {
       await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/api/property`,
         form,
-        { headers }
+        { headers },
       );
 
       toast.success("Property updated successfully!");
@@ -466,7 +466,7 @@ const EditForm = ({ property, properties }: Props) => {
                         ...formData,
                         property_furnishing_items:
                           formData.property_furnishing_items.filter(
-                            (_: string, i: number) => i !== index
+                            (_: string, i: number) => i !== index,
                           ),
                       });
                     }}
@@ -474,7 +474,7 @@ const EditForm = ({ property, properties }: Props) => {
                     Remove
                   </Button>
                 </div>
-              )
+              ),
             )}
           </div>
         </>
@@ -580,7 +580,7 @@ const EditForm = ({ property, properties }: Props) => {
               className="flex flex-wrap items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 cursor-pointer relative w-full h-72"
               onClick={() => {
                 const fileInput = document.getElementById(
-                  "file-input"
+                  "file-input",
                 ) as HTMLInputElement | null;
                 if (fileInput) {
                   fileInput.click();
@@ -644,7 +644,7 @@ const EditForm = ({ property, properties }: Props) => {
         className="flex flex-wrap items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 cursor-pointer relative w-full h-48"
         onClick={() => {
           const fileInput = document.getElementById(
-            "file-input"
+            "file-input",
           ) as HTMLInputElement | null;
           if (fileInput) {
             fileInput.click();

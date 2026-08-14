@@ -14,14 +14,19 @@ import {
   Input,
 } from "@heroui/react";
 import { PhotoProvider, PhotoView } from "react-photo-view";
-import 'react-photo-view/dist/react-photo-view.css';
+import "react-photo-view/dist/react-photo-view.css";
 import { LuUpload } from "react-icons/lu";
 
 function Gallery() {
-  const [images, setImages] = useState<{ image: string; name: string; id: number }[]>([]);
+  const [images, setImages] = useState<
+    { image: string; name: string; id: number }[]
+  >([]);
   const [newImage, setNewImage] = useState<File | null>(null);
   const [imageName, setImageName] = useState<string>("");
-  const [deleteConfirm, setDeleteConfirm] = useState<{ show: boolean; id: number }>({ show: false, id: 0 });
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    show: boolean;
+    id: number;
+  }>({ show: false, id: 0 });
   const [changes, setChanges] = useState(0);
   const [isAdding, setIsAdding] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -29,16 +34,18 @@ function Gallery() {
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-
   useEffect(() => {
     const fetchImages = async () => {
       try {
         const accessToken = sessionStorage.getItem("token");
         if (!accessToken) return;
 
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/images`, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/images`,
+          {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          },
+        );
 
         setImages(response.data.records || []);
       } catch (error) {
@@ -62,7 +69,6 @@ function Gallery() {
     }
   };
 
-
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setImageName(e.target.value);
   };
@@ -79,28 +85,31 @@ function Gallery() {
       if (newImage) form.append("image", newImage);
       form.append("name", imageName);
 
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/images`, form, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "multipart/form-data",
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/images`,
+        form,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "multipart/form-data",
+          },
         },
-      });
+      );
 
       if (response?.data?.record) {
         setImages((prev) => [response.data, ...prev]);
         setChanges((prev) => prev + 1);
-      
+
         // Reset form fields
         setNewImage(null);
         setImageName("");
         setPreviewUrl(null);
-      
+
         // ✅ Close the modal
         onClose();
-      
+
         toast.success("Image added successfully!");
       }
-      
     } catch (error) {
       const axiosError = error as AxiosError;
     }
@@ -120,7 +129,7 @@ function Gallery() {
             Authorization: `Bearer ${accessToken}`,
             "Content-Type": "multipart/form-data",
           },
-        }
+        },
       );
 
       if (response.data.message === "Deleted Image") {
@@ -156,9 +165,11 @@ function Gallery() {
               key={image.id}
               className="relative overflow-hidden rounded-lg shadow-lg group"
             >
-              <PhotoView src={`https://infinitech-testing5.online/images/${image.image}`}>
+              <PhotoView
+                src={`https://infinitech-api6.site/images/${image.image}`}
+              >
                 <Image
-                  src={`https://infinitech-testing5.online/images/${image.image}`}
+                  src={`https://infinitech-api6.site/images/${image.image}`}
                   className="w-full object-cover transform transition-transform duration-300 group-hover:scale-110"
                   width={1000}
                   height={250}
@@ -178,7 +189,11 @@ function Gallery() {
                     stroke="currentColor"
                     strokeWidth="2"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
@@ -189,7 +204,6 @@ function Gallery() {
             </div>
           ))}
         </PhotoProvider>
-
       </div>
 
       {/* Hero UI Modal for Add Image */}
@@ -197,7 +211,9 @@ function Gallery() {
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="text-lg font-medium text-gray-900">Add New Image</ModalHeader>
+              <ModalHeader className="text-lg font-medium text-gray-900">
+                Add New Image
+              </ModalHeader>
               <ModalBody>
                 <div className="mb-4">
                   <Input
@@ -206,7 +222,6 @@ function Gallery() {
                     type="text"
                     value={imageName}
                     onChange={handleNameChange}
-
                     required
                   />
                 </div>
@@ -217,7 +232,6 @@ function Gallery() {
                     type="file"
                     name="image"
                     onChange={handleFileChange}
-
                     required
                   />
 
@@ -230,15 +244,18 @@ function Gallery() {
                       />
                     </div>
                   )}
-
                 </div>
               </ModalBody>
               <ModalFooter>
                 <HeroButton color="danger" variant="light" onPress={onClose}>
                   Cancel
                 </HeroButton>
-                <HeroButton color="primary" onPress={() => handleSubmit(onClose)} isLoading={isAdding}>
-                Add Image
+                <HeroButton
+                  color="primary"
+                  onPress={() => handleSubmit(onClose)}
+                  isLoading={isAdding}
+                >
+                  Add Image
                 </HeroButton>
               </ModalFooter>
             </>
@@ -259,7 +276,8 @@ function Gallery() {
           </ModalHeader>
           <ModalBody>
             <p className="text-sm text-gray-600">
-              This action cannot be undone. The image will be permanently deleted.
+              This action cannot be undone. The image will be permanently
+              deleted.
             </p>
           </ModalBody>
           <ModalFooter className="flex justify-end gap-2">

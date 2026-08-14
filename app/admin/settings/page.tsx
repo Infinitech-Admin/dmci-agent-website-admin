@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import useSWR from 'swr';
-import ProfileMenu from './profilemenu';
+import { useEffect, useState } from "react";
+import useSWR from "swr";
+import ProfileMenu from "./profilemenu";
 
-import { getAuthHeaders } from '@/app/utility/auth';
+import { getAuthHeaders } from "@/app/utility/auth";
 
 const fetcherWithAuth = async (url: string) => {
   const headers = getAuthHeaders();
   const res = await fetch(url, {
-    method: 'GET',
+    method: "GET",
     headers: headers,
   });
   return await res.json();
@@ -19,16 +19,20 @@ const SettingsPage = () => {
   const [profileID, setProfileID] = useState<string | null>(null);
 
   useEffect(() => {
-    const storedProfileID = sessionStorage.getItem('profile_id');
+    const storedProfileID = sessionStorage.getItem("profile_id");
     if (storedProfileID) {
       setProfileID(storedProfileID);
     }
   }, []);
 
-  const { data: profile, error } = useSWR(profileID ? `${process.env.NEXT_PUBLIC_API_URL}/api/profiles/${profileID}` : null, fetcherWithAuth,
+  const { data: profile, error } = useSWR(
+    profileID
+      ? `${process.env.NEXT_PUBLIC_API_URL}/api/profiles/${profileID}`
+      : null,
+    fetcherWithAuth,
     {
       refreshInterval: 5000,
-    }
+    },
   );
 
   if (error) {
@@ -36,7 +40,12 @@ const SettingsPage = () => {
   }
 
   if (!profile) {
-    return <div>  <ProfileMenu /></div>;
+    return (
+      <div>
+        {" "}
+        <ProfileMenu />
+      </div>
+    );
   }
 
   return (
@@ -48,14 +57,15 @@ const SettingsPage = () => {
             className="inline-block size-[62px] rounded-full"
             src={
               profile.record?.image
-                ? `https://infinitech-testing5.online/profiles/${profile.record.image}`
-                : 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=300&h=300&q=80'
+                ? `https://infinitech-api6.site/profiles/${profile.record.image}`
+                : "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=300&h=300&q=80"
             }
             alt="Avatar"
           />
           <div className="">
             <h1 className="flex items-baseline text-2xl font-medium">
-              {profile.record?.user.name || 'Name'} / {profile.record?.position || 'Position'}
+              {profile.record?.user.name || "Name"} /{" "}
+              {profile.record?.position || "Position"}
             </h1>
             <small className="text-gray-400">
               Update your profile and manage your account

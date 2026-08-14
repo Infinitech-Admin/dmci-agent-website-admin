@@ -23,7 +23,7 @@ export const ReplyEmail = ({ message, first_name }: ReplyEmailProps) => (
     <Body style={main}>
       <Container style={container}>
         <Img
-          src="https://infinitech-testing5.online/logo/dmci-logo-only.png"
+          src="https://infinitech-api6.site/logo/dmci-logo-only.png"
           height="80"
           alt="DMCI Homes Logo"
           style={logo}
@@ -32,24 +32,31 @@ export const ReplyEmail = ({ message, first_name }: ReplyEmailProps) => (
         <Text style={text}>Good Day, {first_name}</Text>
 
         <Text style={text}>
-          Thank you for reaching out to DMCI Homes. We have received your inquiry and we truly appreciate your interest in our properties.
+          Thank you for reaching out to DMCI Homes. We have received your
+          inquiry and we truly appreciate your interest in our properties.
         </Text>
 
         <Text style={text}>
-          <b>Your Message:</b><br />
+          <b>Your Message:</b>
+          <br />
           {message}
         </Text>
 
         <Text style={text}>
-          Please note that this is an initial response, and a representative will get in touch with you shortly to provide further assistance or clarification if needed.
+          Please note that this is an initial response, and a representative
+          will get in touch with you shortly to provide further assistance or
+          clarification if needed.
         </Text>
 
         <Text style={text}>
-          Should you have any immediate concerns or additional questions, feel free to respond to this email or contact us directly through our official channels.
+          Should you have any immediate concerns or additional questions, feel
+          free to respond to this email or contact us directly through our
+          official channels.
         </Text>
 
         <Text style={text}>
-          Thank you for considering DMCI Homes. We look forward to assisting you.
+          Thank you for considering DMCI Homes. We look forward to assisting
+          you.
         </Text>
 
         <Hr style={hr} />

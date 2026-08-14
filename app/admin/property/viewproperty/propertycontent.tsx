@@ -1,21 +1,21 @@
-'use client';
+"use client";
 
-import { useRouter } from 'next/navigation';
-import axios, { AxiosError } from 'axios';
-import { useState } from 'react';
-import toast from 'react-hot-toast';
-import useSWR from 'swr';
-import { PhotoProvider, PhotoView } from 'react-photo-view';
-import 'react-photo-view/dist/react-photo-view.css';
+import { useRouter } from "next/navigation";
+import axios, { AxiosError } from "axios";
+import { useState } from "react";
+import toast from "react-hot-toast";
+import useSWR from "swr";
+import { PhotoProvider, PhotoView } from "react-photo-view";
+import "react-photo-view/dist/react-photo-view.css";
 
-import PropertyImageSlider from './propertyimageslider';
+import PropertyImageSlider from "./propertyimageslider";
 
-import { getAuthHeaders } from '@/app/utility/auth';
-import BtnLoadingSpinner from '@/app/components/spinner';
-import { filterMaxPrice } from '@/app/utility/format';
-import { Button, Input, Select, SelectItem, Textarea } from '@heroui/react';
-import { LuX } from 'react-icons/lu';
-import { RiImageAddFill } from 'react-icons/ri';
+import { getAuthHeaders } from "@/app/utility/auth";
+import BtnLoadingSpinner from "@/app/components/spinner";
+import { filterMaxPrice } from "@/app/utility/format";
+import { Button, Input, Select, SelectItem, Textarea } from "@heroui/react";
+import { LuX } from "react-icons/lu";
+import { RiImageAddFill } from "react-icons/ri";
 
 interface PropertyDetailsContentProps {
   id: string | null;
@@ -38,21 +38,23 @@ interface PropertyData {
 const fetcherWithAuth = async (url: string) => {
   const headers = getAuthHeaders();
   const res = await fetch(url, {
-    method: 'GET',
+    method: "GET",
     headers,
   });
 
-  if (!res.ok) throw new Error('Failed to fetch data');
+  if (!res.ok) throw new Error("Failed to fetch data");
 
   return await res.json();
 };
 
-const PropertyDetailsContent: React.FC<PropertyDetailsContentProps> = ({ id }) => {
+const PropertyDetailsContent: React.FC<PropertyDetailsContentProps> = ({
+  id,
+}) => {
   const [previewImages, setPreviewImages] = useState<string[]>([]);
   const router = useRouter();
   const { data, error, mutate } = useSWR<{ record: PropertyData }>(
     id ? `${process.env.NEXT_PUBLIC_API_URL}/api/properties/${id}` : null,
-    fetcherWithAuth
+    fetcherWithAuth,
   );
 
   const [btnLoading, setBtnLoading] = useState(false);
@@ -61,19 +63,23 @@ const PropertyDetailsContent: React.FC<PropertyDetailsContentProps> = ({ id }) =
   const [selectedLogo, setSelectedLogo] = useState<File | null>(null);
 
   const formData = data?.record || {
-    name: '',
-    logo: '',
-    status: '',
-    location: '',
-    min_price: '',
-    max_price: '',
-    slogan: '',
-    description: '',
-    percent: '',
-    images: '',
+    name: "",
+    logo: "",
+    status: "",
+    location: "",
+    min_price: "",
+    max_price: "",
+    slogan: "",
+    description: "",
+    percent: "",
+    images: "",
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >,
+  ) => {
     const { name, value } = e.target;
     mutate({ record: { ...formData, [name]: value } }, false);
   };
@@ -85,7 +91,7 @@ const PropertyDetailsContent: React.FC<PropertyDetailsContentProps> = ({ id }) =
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      if (e.target.name === 'logo') {
+      if (e.target.name === "logo") {
         setSelectedLogo(e.target.files[0]);
       } else {
         const filesArray = Array.from(e.target.files);
@@ -97,7 +103,7 @@ const PropertyDetailsContent: React.FC<PropertyDetailsContentProps> = ({ id }) =
 
   const handleSaveConfirmation = async () => {
     if (!data) {
-      toast.error('No property data found to update.');
+      toast.error("No property data found to update.");
       setTimeout(() => setModalOpen(false), 5000);
       return;
     }
@@ -105,51 +111,56 @@ const PropertyDetailsContent: React.FC<PropertyDetailsContentProps> = ({ id }) =
     setBtnLoading(true);
 
     try {
-      const accessToken = sessionStorage.getItem('token');
+      const accessToken = sessionStorage.getItem("token");
       const headers = {
         Authorization: `Bearer ${accessToken}`,
       };
 
       const formDataToSend = new FormData();
-      formDataToSend.append('_method', 'PUT');
-      formDataToSend.append('id', id || '');
-      formDataToSend.append('user_id', data.record.user_id || '');
+      formDataToSend.append("_method", "PUT");
+      formDataToSend.append("id", id || "");
+      formDataToSend.append("user_id", data.record.user_id || "");
 
       Object.keys(formData).forEach((key) => {
-        if (key !== 'images' && formData[key as keyof PropertyData]) {
+        if (key !== "images" && formData[key as keyof PropertyData]) {
           formDataToSend.append(key, formData[key as keyof PropertyData]!);
         }
       });
 
       if (selectedLogo) {
-        formDataToSend.append('logo', selectedLogo);
+        formDataToSend.append("logo", selectedLogo);
       }
 
       selectedImages.forEach((file) => {
-        formDataToSend.append('images[]', file);
+        formDataToSend.append("images[]", file);
       });
 
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/api/properties`,
         formDataToSend,
-        { headers }
+        { headers },
       );
 
       if (response?.data) {
-        toast.success('Property Updated Successfully');
+        toast.success("Property Updated Successfully");
         mutate();
         setSelectedLogo(null);
         setSelectedImages([]);
         setPreviewImages([]);
-        const logoInput = document.querySelector("input[name='logo']") as HTMLInputElement;
-        const imagesInput = document.querySelector("input[name='images']") as HTMLInputElement;
-        if (logoInput) logoInput.value = '';
-        if (imagesInput) imagesInput.value = '';
+        const logoInput = document.querySelector(
+          "input[name='logo']",
+        ) as HTMLInputElement;
+        const imagesInput = document.querySelector(
+          "input[name='images']",
+        ) as HTMLInputElement;
+        if (logoInput) logoInput.value = "";
+        if (imagesInput) imagesInput.value = "";
       }
     } catch (error) {
       const axiosError = error as AxiosError;
       toast.error(
-        (axiosError.response?.data as { message?: string })?.message || 'An error occurred. Please try again.'
+        (axiosError.response?.data as { message?: string })?.message ||
+          "An error occurred. Please try again.",
       );
     } finally {
       setModalOpen(false);
@@ -160,23 +171,25 @@ const PropertyDetailsContent: React.FC<PropertyDetailsContentProps> = ({ id }) =
   if (error) return <div className="text-red-500">Error: {error.message}</div>;
   if (!data) return <div>Loading...</div>;
 
-  const initialImages = JSON.parse(data.record.images || '[]');
+  const initialImages = JSON.parse(data.record.images || "[]");
 
   const handleRemoveImage = (indexToRemove: number) => {
-    setPreviewImages((prev) => prev.filter((_, index) => index !== indexToRemove));
-    setSelectedImages((prev) => prev.filter((_, index) => index !== indexToRemove));
+    setPreviewImages((prev) =>
+      prev.filter((_, index) => index !== indexToRemove),
+    );
+    setSelectedImages((prev) =>
+      prev.filter((_, index) => index !== indexToRemove),
+    );
   };
 
   const statusMapping: { [key: string]: string } = {
-    RFO: 'Ready For Occupancy',
-    UC: 'Under Construction',
-    New: 'New',
+    RFO: "Ready For Occupancy",
+    UC: "Under Construction",
+    New: "New",
   };
-
 
   return (
     <div className="mt-4 overflow-y-auto">
-
       <form onSubmit={handleSubmit} className="mt-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4">
           <div className="w-full">
@@ -186,7 +199,7 @@ const PropertyDetailsContent: React.FC<PropertyDetailsContentProps> = ({ id }) =
               type="text"
               name="name"
               placeholder="Sonora Garden Residences"
-              value={formData.name || ''}
+              value={formData.name || ""}
               onChange={handleChange}
             />
           </div>
@@ -196,20 +209,33 @@ const PropertyDetailsContent: React.FC<PropertyDetailsContentProps> = ({ id }) =
               variant="bordered"
               label="Unit Status"
               name="status"
-              selectedKeys={formData.status && statusMapping[formData.status] ? new Set([statusMapping[formData.status]]) : new Set()}
+              selectedKeys={
+                formData.status && statusMapping[formData.status]
+                  ? new Set([statusMapping[formData.status]])
+                  : new Set()
+              }
               onSelectionChange={(keys) => {
-                const selectedValue = Array.from(keys).join('');
+                const selectedValue = Array.from(keys).join("");
                 // Reverse map to send API-friendly value
                 const apiValue = Object.keys(statusMapping).find(
-                  (key) => statusMapping[key] === selectedValue
+                  (key) => statusMapping[key] === selectedValue,
                 );
-                mutate({ record: { ...formData, status: apiValue || '' } }, false);
+                mutate(
+                  { record: { ...formData, status: apiValue || "" } },
+                  false,
+                );
               }}
             >
-              <SelectItem key="Under Construction" textValue="Under Construction">
+              <SelectItem
+                key="Under Construction"
+                textValue="Under Construction"
+              >
                 Under Construction
               </SelectItem>
-              <SelectItem key="Ready For Occupancy" textValue="Ready For Occupancy">
+              <SelectItem
+                key="Ready For Occupancy"
+                textValue="Ready For Occupancy"
+              >
                 Ready For Occupancy
               </SelectItem>
               <SelectItem key="New" textValue="New">
@@ -225,7 +251,7 @@ const PropertyDetailsContent: React.FC<PropertyDetailsContentProps> = ({ id }) =
               type="text"
               name="percent"
               placeholder="Percent"
-              value={formData.percent || ''}
+              value={formData.percent || ""}
               onChange={handleChange}
             />
           </div>
@@ -237,11 +263,10 @@ const PropertyDetailsContent: React.FC<PropertyDetailsContentProps> = ({ id }) =
               type="text"
               name="location"
               placeholder="Location"
-              value={formData.location || ''}
+              value={formData.location || ""}
               onChange={handleChange}
             />
           </div>
-
 
           <div className="w-full col-span-full">
             <Textarea
@@ -249,7 +274,7 @@ const PropertyDetailsContent: React.FC<PropertyDetailsContentProps> = ({ id }) =
               label="Description"
               name="description"
               placeholder="Property Description"
-              value={formData.description || ''}
+              value={formData.description || ""}
               onChange={handleChange}
             />
           </div>
@@ -272,10 +297,15 @@ const PropertyDetailsContent: React.FC<PropertyDetailsContentProps> = ({ id }) =
             <PhotoProvider>
               {initialImages.length > 0 &&
                 initialImages.map((image: string, index: number) => (
-                  <div key={`initial-${index}`} className="w-24 h-24 relative group">
-                    <PhotoView src={`https://infinitech-testing5.online/properties/images/${image}`}>
+                  <div
+                    key={`initial-${index}`}
+                    className="w-24 h-24 relative group"
+                  >
+                    <PhotoView
+                      src={`https://infinitech-api6.site/properties/images/${image}`}
+                    >
                       <img
-                        src={`https://infinitech-testing5.online/properties/images/${image}`}
+                        src={`https://infinitech-api6.site/properties/images/${image}`}
                         alt={`Existing Image ${index + 1}`}
                         className="w-full h-full object-cover rounded-lg"
                       />
@@ -286,7 +316,10 @@ const PropertyDetailsContent: React.FC<PropertyDetailsContentProps> = ({ id }) =
 
             {previewImages.length > 0 &&
               previewImages.map((image, index) => (
-                <div key={`preview-${index}`} className="w-24 h-24 relative group">
+                <div
+                  key={`preview-${index}`}
+                  className="w-24 h-24 relative group"
+                >
                   <img
                     src={image}
                     alt={`Preview ${index + 1}`}
@@ -306,24 +339,18 @@ const PropertyDetailsContent: React.FC<PropertyDetailsContentProps> = ({ id }) =
               <p className="text-gray-500">Upload Images</p>
             )}
           </div>
-
         </div>
 
         <div className="flex flex-col justify-end sm:flex-row gap-3 mt-4">
           <Button
-            size='lg'
-            variant='bordered'
+            size="lg"
+            variant="bordered"
             type="button"
-            onPress={() => router.push('/admin/property')}
+            onPress={() => router.push("/admin/property")}
           >
             Cancel Edit
           </Button>
-          <Button
-            type="submit"
-            variant='solid'
-            color='primary'
-            size='lg'
-          >
+          <Button type="submit" variant="solid" color="primary" size="lg">
             Save Changes
           </Button>
         </div>
@@ -343,11 +370,11 @@ const PropertyDetailsContent: React.FC<PropertyDetailsContentProps> = ({ id }) =
                 Cancel
               </button>
               <button
-                className={`min-w-[100px] py-2 px-3 text-sm font-medium text-white rounded-lg ${btnLoading ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'}`}
+                className={`min-w-[100px] py-2 px-3 text-sm font-medium text-white rounded-lg ${btnLoading ? "bg-blue-400" : "bg-blue-600 hover:bg-blue-700"}`}
                 onClick={handleSaveConfirmation}
                 disabled={btnLoading}
               >
-                {btnLoading ? <BtnLoadingSpinner /> : 'Confirm'}
+                {btnLoading ? <BtnLoadingSpinner /> : "Confirm"}
               </button>
             </div>
           </div>

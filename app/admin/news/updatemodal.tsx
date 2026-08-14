@@ -52,7 +52,7 @@ const UpdateNews: React.FC<UpdateNewsProps> = ({
   useEffect(() => {
     if (typeof initialData.image === "string") {
       // Construct the full image URL if the image is just a filename
-      const imageUrl = `https://infinitech-testing5.online/articles/${initialData.image}`;
+      const imageUrl = `https://infinitech-api6.site/articles/${initialData.image}`;
       setImagePreview(imageUrl); // Set the full URL for image preview
     } else {
       setImagePreview(null); // Reset the image preview if it's not a URL or string
@@ -109,7 +109,7 @@ const UpdateNews: React.FC<UpdateNewsProps> = ({
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/api/articles`,
         formDataToSend,
-        { headers }
+        { headers },
       );
 
       if (response?.data) {
@@ -211,7 +211,7 @@ const UpdateNews: React.FC<UpdateNewsProps> = ({
                       className="flex flex-wrap items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 cursor-pointer relative w-1/2 h-48"
                       onClick={() => {
                         const fileInput = document.getElementById(
-                          "file-input"
+                          "file-input",
                         ) as HTMLInputElement | null;
                         if (fileInput) fileInput.click();
                       }}

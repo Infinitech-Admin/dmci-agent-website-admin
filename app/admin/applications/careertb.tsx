@@ -57,7 +57,7 @@ const CareerTable: React.FC = () => {
   };
   const { data, error, mutate } = useSWR(
     `${process.env.NEXT_PUBLIC_API_URL}/api/applications`,
-    fetcherWithAuth
+    fetcherWithAuth,
   );
   const [categories, setCategories] = useState<Category[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -65,7 +65,7 @@ const CareerTable: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [categoryToUpdate, setCategoryToUpdate] = useState<Category | null>(
-    null
+    null,
   );
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
@@ -113,10 +113,10 @@ const CareerTable: React.FC = () => {
         {
           method: "DELETE",
           headers: headers,
-        }
+        },
       );
       setCategories((prevCategories) =>
-        prevCategories.filter((category) => category.id !== categoryId)
+        prevCategories.filter((category) => category.id !== categoryId),
       );
     } catch (error) {
       console.error("Error deleting category:", error);
@@ -166,12 +166,12 @@ const CareerTable: React.FC = () => {
       key: "resume",
       label: "Resume",
       renderCell: (category: Category) => {
-        const fileUrl = `https://infinitech-testing5.online/careers/applications/${category.resume}`;
+        const fileUrl = `https://infinitech-api6.site/careers/applications/${category.resume}`;
         const fileExtension = category.resume.split(".").pop()?.toLowerCase();
 
         // Check if the file is an image
         const isImage = ["jpg", "jpeg", "png", "gif", "bmp", "webp"].includes(
-          fileExtension || ""
+          fileExtension || "",
         );
 
         return (
