@@ -3,13 +3,13 @@
 import { useEffect, useState } from "react";
 import useSWR from "swr";
 import DeleteConfirmationModal from "@/app/components/modal/deletemodal";
+import InquiryDetailModal from "@/app/components/modal/InquiryDetailModal";
 
 import { getAuthHeaders } from "@/app/utility/auth";
 import { LuPenLine, LuTrash2 } from "react-icons/lu";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { Button } from "@heroui/button";
-import DashboardTableData from "@/app/components/dashboardtabledata";
+import DashboardCardData from "@/app/components/dashboardCarddata";
 
 type Category = {
   id: string;
@@ -28,40 +28,35 @@ const DashboardInquiryTable: React.FC = () => {
 
   const fetcherWithAuth = async (url: string) => {
     const headers = getAuthHeaders();
-
-    const res = await fetch(url, {
-      method: "GET",
-      headers: headers,
-    });
+    const res = await fetch(url, { method: "GET", headers });
 
     if (res.status === 401) {
       router.replace("/auth/login");
       return;
     }
-
     if (res.status === 429) {
       toast.error("Too many requests. Please try again later.");
       return;
     }
-
     return await res.json();
   };
-  const { data, error, mutate } = useSWR(
+
+  const { data, error } = useSWR(
     `${process.env.NEXT_PUBLIC_API_URL}/api/inquiries`,
-    fetcherWithAuth
+    fetcherWithAuth,
   );
+
   const [categories, setCategories] = useState<Category[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Delete modal state
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
-  const [updateModalOpen, setUpdateModalOpen] = useState(false);
-  const [categoryToUpdate, setCategoryToUpdate] = useState<Category | null>(
-    null
-  );
-  const [isLoading, setIsLoading] = useState(true);
   const [deleteBtnLoading, setDeleteBtnLoading] = useState(false);
+
+  // Detail modal state
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [selectedInquiry, setSelectedInquiry] = useState<Category | null>(null);
 
   useEffect(() => {
     if (data && !error) {
@@ -75,6 +70,23 @@ const DashboardInquiryTable: React.FC = () => {
     setDeleteModalOpen(true);
   };
 
+  const deleteCategory = async (categoryId: string) => {
+    const headers = getAuthHeaders();
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/inquiries/${categoryId}`,
+      {
+        method: "DELETE",
+        headers,
+      },
+    );
+
+    if (!res.ok) {
+      throw new Error(`Failed to delete inquiry (${res.status})`);
+    }
+
+    setCategories((prev) => prev.filter((c) => c.id !== categoryId));
+  };
+
   const confirmDeleteCategory = async () => {
     if (!categoryToDelete) return;
     setDeleteBtnLoading(true);
@@ -82,77 +94,92 @@ const DashboardInquiryTable: React.FC = () => {
       await deleteCategory(categoryToDelete);
       toast.success("Inquiry deleted successfully!");
       setDeleteModalOpen(false);
+    } catch (err) {
+      console.error("Error deleting inquiry:", err);
+      toast.error("Failed to delete inquiry.");
+    } finally {
       setDeleteBtnLoading(false);
-    } catch (error) {
-      console.error("Error deleting inquiry:", error);
     }
   };
 
-  const deleteCategory = async (categoryId: string) => {
-    try {
-      const headers = getAuthHeaders();
-      await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/questions/${categoryId}`,
-        {
-          method: "DELETE",
-          headers: headers,
-        }
-      );
-      setCategories((prevCategories) =>
-        prevCategories.filter((category) => category.id !== categoryId)
-      );
-    } catch (error) {
-      console.error("Error deleting category:", error);
-    }
+  const handleRowClick = (category: Category) => {
+    setSelectedInquiry(category);
+    setDetailModalOpen(true);
   };
 
-  const closeUpdateModal = () => setUpdateModalOpen(false);
-
-  const columns = [
-    // { label: 'ID', accessor: (category: Category) => category.id },
-    {
-      key: "name",
-      label: "Name and Email",
-      renderCell: (category: Category) => (
-        <div>
-        <p className="font-semibold">
-  {`${category.first_name.charAt(0).toUpperCase()}${category.first_name.slice(1).toLowerCase()} ${category.last_name.charAt(0).toUpperCase()}${category.last_name.slice(1).toLowerCase()}`}
-</p>
-
-          <span className="text-gray-500 text-md">{category.email}</span>
-        </div>
-      ),
-    },
-
+  const fields = [
     {
       key: "property",
       label: "Property",
-      renderCell: (category: Category) => category.property_name,
+      renderValue: (category: Category) => category.property_name,
     },
     {
       key: "unit",
       label: "Unit/PS Type",
-      renderCell: (category: Category) => category.unit_type,
+      renderValue: (category: Category) => category.unit_type,
+    },
+    {
+      key: "phone",
+      label: "Phone",
+      renderValue: (category: Category) => category.phone || "—",
     },
   ];
 
+  const capitalize = (s: string) =>
+    s ? `${s.charAt(0).toUpperCase()}${s.slice(1).toLowerCase()}` : "";
+
   return (
     <div>
-      {isLoading ? (
-        <div className="animate-pulse space-y-4">
-          {[...Array(itemsPerPage)].map((_, index) => (
-            <div key={index} className="h-10 bg-gray-300 rounded-lg"></div>
-          ))}
-        </div>
-      ) : (
-        <DashboardTableData
-          filter={false}
-          label="INQUIRIES"
-          description="Manage and respond to all inquiries."
-          columns={columns}
-          data={categories}
-        />
-      )}
+      <DashboardCardData
+        filter={false}
+        loading={isLoading}
+        label="INQUIRIES"
+        description="Manage and respond to all inquiries."
+        fields={fields}
+        data={categories}
+        onRowClick={handleRowClick}
+        renderTitle={(category: Category) => (
+          <div className="min-w-0">
+            <p className="font-semibold truncate">
+              {capitalize(category.first_name)} {capitalize(category.last_name)}
+            </p>
+            <span className="text-gray-500 text-xs truncate block">
+              {category.email}
+            </span>
+          </div>
+        )}
+        renderActions={(category: Category) => (
+          <>
+            <button
+              className="text-gray-400 hover:text-violet-700 transition-colors"
+              aria-label="Edit inquiry"
+            >
+              <LuPenLine size={16} />
+            </button>
+            <button
+              className="text-gray-400 hover:text-red-600 transition-colors"
+              aria-label="Delete inquiry"
+              onClick={() => handleDeleteClick(category.id)}
+            >
+              <LuTrash2 size={16} />
+            </button>
+          </>
+        )}
+      />
+
+      <DeleteConfirmationModal
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={confirmDeleteCategory}
+        deleteBtnLoading={deleteBtnLoading}
+        message="Are you sure you want to delete this inquiry? This action cannot be undone."
+      />
+
+      <InquiryDetailModal
+        isOpen={detailModalOpen}
+        onClose={() => setDetailModalOpen(false)}
+        inquiry={selectedInquiry}
+      />
     </div>
   );
 };
