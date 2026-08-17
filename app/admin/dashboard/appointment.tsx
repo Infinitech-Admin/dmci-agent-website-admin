@@ -10,7 +10,7 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { Chip } from "@heroui/react";
 import { GoDotFill } from "react-icons/go";
-import DashboardCardData from "@/app/components/dashboardCarddata";
+import DashboardResponsiveTable from "@/app/components/dashboardresponsivetable";
 
 type Appointment = {
   id: string;
@@ -75,13 +75,16 @@ const DashboardAppointmentTable: React.FC = () => {
     setDeleteBtnLoading(true);
     try {
       const headers = getAuthHeaders();
-      await fetch(
+      const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/appointments/${appointmentToDelete}`,
         {
           method: "DELETE",
           headers,
         },
       );
+
+      if (!res.ok)
+        throw new Error(`Failed to delete appointment (${res.status})`);
 
       setAppointments((prev) =>
         prev.filter((appointment) => appointment.id !== appointmentToDelete),
@@ -109,23 +112,41 @@ const DashboardAppointmentTable: React.FC = () => {
     "Property Consultation": "success",
   };
 
-  const fields = [
+  const columns = [
+    {
+      key: "name",
+      label: "Name and Email",
+      renderCell: (appointment: Appointment) => (
+        <div>
+          <p className="font-semibold capitalize truncate">
+            {appointment.name}
+          </p>
+          <span className="text-gray-500 text-xs sm:text-md truncate block">
+            {appointment.email}
+          </span>
+        </div>
+      ),
+    },
     {
       key: "phone",
       label: "Phone",
-      renderValue: (appointment: Appointment) => appointment.phone || "—",
+      renderCell: (appointment: Appointment) => (
+        <span className="text-sm text-gray-800">
+          {appointment.phone || "—"}
+        </span>
+      ),
     },
     {
-      key: "property",
+      key: "unit",
       label: "Property",
-      renderValue: (appointment: Appointment) => (
-        <span className="capitalize">{appointment.properties}</span>
+      renderCell: (appointment: Appointment) => (
+        <div className="capitalize">{appointment.properties}</div>
       ),
     },
     {
       key: "type",
-      label: "Type",
-      renderValue: (appointment: Appointment) => (
+      label: "Appointment Type",
+      renderCell: (appointment: Appointment) => (
         <Chip
           size="sm"
           className="uppercase font-semibold"
@@ -140,7 +161,7 @@ const DashboardAppointmentTable: React.FC = () => {
     {
       key: "status",
       label: "Status",
-      renderValue: (appointment: Appointment) => {
+      renderCell: (appointment: Appointment) => {
         const statusColor =
           appointment.status === "Pending"
             ? "warning"
@@ -162,29 +183,11 @@ const DashboardAppointmentTable: React.FC = () => {
         );
       },
     },
-  ];
-
-  return (
-    <div>
-      <DashboardCardData
-        filter={false}
-        loading={isLoading}
-        label="APPOINTMENTS"
-        description="Manage and respond to all schedule appointments."
-        fields={fields}
-        data={appointments}
-        onRowClick={handleRowClick}
-        renderTitle={(appointment: Appointment) => (
-          <div className="min-w-0">
-            <p className="font-semibold capitalize truncate">
-              {appointment.name}
-            </p>
-            <span className="text-gray-500 text-xs truncate block">
-              {appointment.email}
-            </span>
-          </div>
-        )}
-        renderActions={(appointment: Appointment) => (
+    {
+      key: "actions",
+      label: "Actions",
+      renderCell: (appointment: Appointment) => (
+        <div className="flex gap-2">
           <button
             className="text-gray-400 hover:text-red-600 transition-colors"
             aria-label="Delete appointment"
@@ -192,7 +195,21 @@ const DashboardAppointmentTable: React.FC = () => {
           >
             <LuTrash2 size={16} />
           </button>
-        )}
+        </div>
+      ),
+    },
+  ];
+
+  return (
+    <div>
+      <DashboardResponsiveTable
+        filter={false}
+        loading={isLoading}
+        label="APPOINTMENTS"
+        description="Manage and respond to all schedule appointments."
+        columns={columns}
+        data={appointments}
+        onRowClick={handleRowClick}
       />
 
       <DeleteConfirmationModal

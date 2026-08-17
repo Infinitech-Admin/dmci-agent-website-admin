@@ -9,7 +9,7 @@ import { getAuthHeaders } from "@/app/utility/auth";
 import { LuPenLine, LuTrash2 } from "react-icons/lu";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import DashboardCardData from "@/app/components/dashboardCarddata";
+import DashboardResponsiveTable from "@/app/components/dashboardresponsivetable";
 
 type Category = {
   id: string;
@@ -49,12 +49,10 @@ const DashboardInquiryTable: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Delete modal state
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
   const [deleteBtnLoading, setDeleteBtnLoading] = useState(false);
 
-  // Detail modal state
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedInquiry, setSelectedInquiry] = useState<Category | null>(null);
 
@@ -79,11 +77,7 @@ const DashboardInquiryTable: React.FC = () => {
         headers,
       },
     );
-
-    if (!res.ok) {
-      throw new Error(`Failed to delete inquiry (${res.status})`);
-    }
-
+    if (!res.ok) throw new Error(`Failed to delete inquiry (${res.status})`);
     setCategories((prev) => prev.filter((c) => c.id !== categoryId));
   };
 
@@ -107,64 +101,72 @@ const DashboardInquiryTable: React.FC = () => {
     setDetailModalOpen(true);
   };
 
-  const fields = [
+  const capitalize = (s: string) =>
+    s ? `${s.charAt(0).toUpperCase()}${s.slice(1).toLowerCase()}` : "";
+
+  const columns = [
+    {
+      key: "name",
+      label: "Name and Email",
+      renderCell: (category: Category) => (
+        <div>
+          <p className="font-semibold truncate">
+            {capitalize(category.first_name)} {capitalize(category.last_name)}
+          </p>
+          <span className="text-gray-500 text-xs sm:text-md truncate block">
+            {category.email}
+          </span>
+        </div>
+      ),
+    },
     {
       key: "property",
       label: "Property",
-      renderValue: (category: Category) => category.property_name,
+      renderCell: (category: Category) => category.property_name,
     },
     {
       key: "unit",
       label: "Unit/PS Type",
-      renderValue: (category: Category) => category.unit_type,
+      renderCell: (category: Category) => category.unit_type,
     },
     {
       key: "phone",
       label: "Phone",
-      renderValue: (category: Category) => category.phone || "—",
+      renderCell: (category: Category) => category.phone || "—",
+    },
+    {
+      key: "actions",
+      label: "Actions",
+      renderCell: (category: Category) => (
+        <div className="flex gap-2">
+          <button
+            className="text-gray-400 hover:text-violet-700 transition-colors"
+            aria-label="Edit inquiry"
+          >
+            <LuPenLine size={16} />
+          </button>
+          <button
+            className="text-gray-400 hover:text-red-600 transition-colors"
+            aria-label="Delete inquiry"
+            onClick={() => handleDeleteClick(category.id)}
+          >
+            <LuTrash2 size={16} />
+          </button>
+        </div>
+      ),
     },
   ];
 
-  const capitalize = (s: string) =>
-    s ? `${s.charAt(0).toUpperCase()}${s.slice(1).toLowerCase()}` : "";
-
   return (
     <div>
-      <DashboardCardData
+      <DashboardResponsiveTable
         filter={false}
         loading={isLoading}
         label="INQUIRIES"
         description="Manage and respond to all inquiries."
-        fields={fields}
+        columns={columns}
         data={categories}
         onRowClick={handleRowClick}
-        renderTitle={(category: Category) => (
-          <div className="min-w-0">
-            <p className="font-semibold truncate">
-              {capitalize(category.first_name)} {capitalize(category.last_name)}
-            </p>
-            <span className="text-gray-500 text-xs truncate block">
-              {category.email}
-            </span>
-          </div>
-        )}
-        renderActions={(category: Category) => (
-          <>
-            <button
-              className="text-gray-400 hover:text-violet-700 transition-colors"
-              aria-label="Edit inquiry"
-            >
-              <LuPenLine size={16} />
-            </button>
-            <button
-              className="text-gray-400 hover:text-red-600 transition-colors"
-              aria-label="Delete inquiry"
-              onClick={() => handleDeleteClick(category.id)}
-            >
-              <LuTrash2 size={16} />
-            </button>
-          </>
-        )}
       />
 
       <DeleteConfirmationModal
