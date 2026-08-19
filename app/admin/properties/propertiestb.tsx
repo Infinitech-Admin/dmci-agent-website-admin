@@ -31,7 +31,7 @@ type Property = {
     buildings: {
       name: string;
     };
-  };
+  } | null;
 };
 
 const fetcher = async (url: string) => {
@@ -171,9 +171,22 @@ const PropertiesTable: React.FC = () => {
       key: "name",
       label: "Property",
       renderCell: (prop: Property) => {
+        // Guard against listings whose `property` relation failed to
+        // resolve (e.g. an orphaned property_id). Without this, a single
+        // broken row crashes the entire admin table.
+        const hasValidProperty = Boolean(prop.property?.name);
+
         return (
           <div>
-            <h1 className="font-medium">{prop.property.name}</h1>
+            <h1 className="font-medium">
+              {hasValidProperty ? (
+                prop.property!.name
+              ) : (
+                <span className="text-danger flex items-center gap-1">
+                  ⚠ Missing Property Link
+                </span>
+              )}
+            </h1>
             <p className="text-sm text-default-500">{prop.property_location}</p>
           </div>
         );
