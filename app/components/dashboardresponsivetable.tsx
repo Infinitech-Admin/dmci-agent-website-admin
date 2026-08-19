@@ -37,7 +37,39 @@ interface DataTableProps {
   onRowClick?: (row: any) => void;
   /** key of the column that holds action buttons — shown top-right on cards, last column on table */
   actionsKey?: string;
+  /**
+   * Field paths to search against. Supports nested paths via dot
+   * notation (e.g. "property.name"). Defaults to the original flat
+   * field list so existing usages keep working unchanged.
+   */
+  searchKeys?: string[];
 }
+
+const DEFAULT_SEARCH_KEYS = [
+  "first_name",
+  "last_name",
+  "email",
+  "phone",
+  "property_name",
+  "unit_type",
+  "name",
+  "type",
+  "properties",
+];
+
+// Resolves a possibly-nested field path (e.g. "property.name") against
+// an object, safely returning "" if any segment along the way is
+// null/undefined instead of throwing — so a row with a broken relation
+// just doesn't match the search instead of crashing the table.
+const getFieldValue = (item: any, path: string): string => {
+  const value = path
+    .split(".")
+    .reduce(
+      (acc, key) => (acc === null || acc === undefined ? acc : acc[key]),
+      item,
+    );
+  return String(value ?? "");
+};
 
 const DashboardResponsiveTable = ({
   columns,
@@ -49,6 +81,7 @@ const DashboardResponsiveTable = ({
   loading = false,
   onRowClick,
   actionsKey = "actions",
+  searchKeys = DEFAULT_SEARCH_KEYS,
 }: DataTableProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -83,24 +116,15 @@ const DashboardResponsiveTable = ({
   };
 
   const filteredData = useMemo(() => {
+    const term = searchTerm.toLowerCase();
+    if (!term) return data;
+
     return data.filter((item) =>
-      [
-        "first_name",
-        "last_name",
-        "email",
-        "phone",
-        "property_name",
-        "unit_type",
-        "name",
-        "type",
-        "properties",
-      ].some((key) =>
-        String(item[key] ?? "")
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase()),
+      searchKeys.some((key) =>
+        getFieldValue(item, key).toLowerCase().includes(term),
       ),
     );
-  }, [searchTerm, data]);
+  }, [searchTerm, data, searchKeys]);
 
   const totalPages = Math.ceil(filteredData.length / rowsPerPage) || 1;
   const paginatedData = filteredData.slice(
