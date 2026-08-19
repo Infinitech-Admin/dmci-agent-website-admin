@@ -9,7 +9,7 @@ import { FaRegStar, FaStar } from "react-icons/fa";
 import { Button } from "@heroui/button";
 import { Chip, Spinner, Tooltip } from "@heroui/react";
 import DeleteConfirmationModal from "@/app/components/modal/deletemodal";
-import TableData from "@/app/components/tabledata";
+import DashboardResponsiveTable from "@/app/components/dashboardresponsivetable";
 import { getAuthHeaders } from "@/app/utility/auth";
 import { priceFormatted } from "@/app/utility/format";
 import { SlPlus } from "react-icons/sl";
@@ -59,7 +59,7 @@ const PropertiesTable: React.FC = () => {
   // Fetch user type
   const { data: userData, error: userError } = useSWR(
     user_id ? `${process.env.NEXT_PUBLIC_API_URL}/api/users/${user_id}` : null,
-    fetcher
+    fetcher,
   );
 
   // Fetch properties
@@ -104,7 +104,7 @@ const PropertiesTable: React.FC = () => {
       {
         method: "DELETE",
         headers: headers,
-      }
+      },
     );
     if (response.ok) {
       mutate(`${process.env.NEXT_PUBLIC_API_URL}/api/property`);
@@ -124,7 +124,7 @@ const PropertiesTable: React.FC = () => {
             Authorization: `Bearer ${accessToken}`,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       if (response.ok) {
@@ -140,8 +140,10 @@ const PropertiesTable: React.FC = () => {
     }
   };
 
-  const Status: Record<string, "primary" | "warning" | "success" | "default"> = {
-    "Studio": "success",
+  type ChipColor = "primary" | "warning" | "success" | "default";
+
+  const Status: Record<string, ChipColor> = {
+    Studio: "success",
     "1 Bedroom": "primary",
     "2 Bedroom": "primary",
     "3 Bedroom": "primary",
@@ -161,9 +163,8 @@ const PropertiesTable: React.FC = () => {
     "Ready For Occupancy": "success",
     "Pre-Selling": "warning",
     "Under Construction": "warning",
-    "New": "primary",
+    New: "primary",
   };
-  
 
   const columns = [
     {
@@ -188,13 +189,11 @@ const PropertiesTable: React.FC = () => {
       label: "Area",
       renderCell: (prop: Property) => `${prop.property_size} sqm`,
     },
-
     {
       key: "level",
       label: "Floor Level",
       renderCell: (prop: Property) => `${prop.property_level}`,
     },
-
     {
       key: "min_price",
       label: "Price",
@@ -213,7 +212,6 @@ const PropertiesTable: React.FC = () => {
         );
       },
     },
-
     {
       key: "actions",
       label: "Actions",
@@ -294,14 +292,25 @@ const PropertiesTable: React.FC = () => {
     { key: "3 Bedroom w/ Parking", label: "3 Bedroom w/ Parking" },
     { key: "Tandem Unit w/ Parking", label: "Tandem Unit w/ Parking" },
     { key: "Studio w/ Tandem Parking", label: "Studio w/ Tandem Parking" },
-    { key: "1 Bedroom w/ Tandem Parking", label: "1 Bedroom w/ Tandem Parking" },
-    { key: "2 Bedroom w/ Tandem Parking", label: "2 Bedroom w/ Tandem Parking" },
-    { key: "3 Bedroom w/ Tandem Parking", label: "3 Bedroom w/ Tandem Parking" },
-    { key: "Tandem Unit w/ Tandem Parking", label: "Tandem Unit w/ Tandem Parking" },
+    {
+      key: "1 Bedroom w/ Tandem Parking",
+      label: "1 Bedroom w/ Tandem Parking",
+    },
+    {
+      key: "2 Bedroom w/ Tandem Parking",
+      label: "2 Bedroom w/ Tandem Parking",
+    },
+    {
+      key: "3 Bedroom w/ Tandem Parking",
+      label: "3 Bedroom w/ Tandem Parking",
+    },
+    {
+      key: "Tandem Unit w/ Tandem Parking",
+      label: "Tandem Unit w/ Tandem Parking",
+    },
     { key: "1 Parking Slot", label: "1 Parking Slot" },
     { key: "Tandem Parking", label: "Tandem Parking" },
   ];
-  
 
   return (
     <div className="p-4">
@@ -319,7 +328,7 @@ const PropertiesTable: React.FC = () => {
         </div>
       </div>
 
-      <TableData
+      <DashboardResponsiveTable
         filter={true}
         label="PROPERTIES"
         description="Manage and view all listed properties."
