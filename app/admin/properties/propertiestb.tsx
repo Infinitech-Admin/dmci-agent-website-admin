@@ -349,6 +349,12 @@ const PropertiesTable: React.FC = () => {
         data={properties}
         statusOptions={statusOptions}
         loading={isLoading}
+        searchKeys={[
+          "property.name",
+          "property_location",
+          "property_type",
+          "property_building",
+        ]}
       />
 
       <DeleteConfirmationModal
